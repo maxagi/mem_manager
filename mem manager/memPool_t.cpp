@@ -22,7 +22,7 @@ memPool_t::~memPool_t(){
 }
 
 int memPool_t::write(void* const data, const int& sizeOfdata, const int& toPos){
-	int posInPage, bytesWritten = 0;												//will hold offset inside page
+	int posInPage, bytesWritten = 0;											//will hold offset inside page
 	int targetPageNumber = getPage(&posInPage, toPos);
 
 	if (targetPageNumber == numOfPages)
