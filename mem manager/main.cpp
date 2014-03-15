@@ -13,10 +13,10 @@ including arrays , structs , objects , etc' (just like in fread & fwrite)
 
 int main() {
 
-	bool cont = true;			// trigger to stop loop
-
+	bool cont = true, flag;			// trigger to stop loop
+	int writeflag = 0;
 	int value, position, size, result, temp;
-	int rx;
+	int rx = -1;
 
 	memPool_t pool;
 
@@ -34,7 +34,7 @@ int main() {
 			<< "9 - size?" << endl
 			<< "10 - get default size of memory page " << endl
 			<< "11 - set default size of memory page " << endl
-			<< "Any other key - quit" << endl;
+			<< "12 - quit " << endl;
 		cin >> c;
 
 		switch (c) {
@@ -50,7 +50,12 @@ int main() {
 			cin >> value;
 			cout << "enter position" << endl;
 			cin >> position;
-			pool.write(&value, sizeof(int), position);
+			result = pool.write(&value, sizeof(int), position);
+			if (result == -1){
+				printf("position Does not exist\n");
+				break;
+			}
+			cout << "written " << result << " bytes from position " << position << endl;
 			break;
 		case 3:
 			pool.read(&rx, sizeof(int));
@@ -59,8 +64,11 @@ int main() {
 		case 4:
 			cout << "enter position" << endl;
 			cin >> position;
-			pool.read(&rx, sizeof(int), position);
-			printf("read from position %d : %d\n", position, rx);
+			flag = pool.read(&rx, sizeof(int), position);
+			if (flag)
+				printf("read from position %d : %d\n", position, rx);
+			else
+				printf("position Does not exist\n");
 			break;
 		case 5:
 			cout << "current position = " << pool.getPos() << endl;
@@ -92,9 +100,11 @@ int main() {
 			cin >> size;
 			pool.setDefaultPageSize(size);
 			break;
-
-		default:
+		case 12:
 			cont = false;
+			break;
+		default:
+			printf("wrong choice\n");
 			break;
 		}
 	}

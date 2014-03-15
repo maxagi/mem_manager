@@ -12,12 +12,17 @@ memPage_t::~memPage_t(){
 	delete[] data;
 }
 
-void memPage_t::read(void *dst, const int & size, const int & fromPos) const{
+bool memPage_t::read(void *dst, const int & size, const int & fromPos) const{
 	assert(fromPos + size <= capacity);
 	memcpy(dst, data + fromPos, size);
+	return true;
 }
 
 int  memPage_t::write(void* const newData, const int& sizeOfdata, const int& toPos){
+
+	if (toPos < 0){
+		return -1;
+	}
 	assert(toPos + sizeOfdata <= capacity);
 	memcpy(data + toPos, newData, sizeOfdata);
 	currentPos = currentPos + sizeOfdata;

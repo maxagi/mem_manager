@@ -11,12 +11,10 @@ memPool_t::memPool_t(){
 	pageSizes[0] = defaultPageSize = 8;
 	numOfPages = 1;
 	actualSize = 0;
+	setPos(0);
 }
 
 memPool_t::~memPool_t(){
-	for (int i = 0; i < numOfPages; i++){
-		delete(pages[i]);
-	}
 	delete[] pages;
 	delete pageSizes;
 }
@@ -33,6 +31,8 @@ int memPool_t::write(void* const data, const int& sizeOfdata, const int& toPos){
 
 	if (posInPage + sizeOfdata <= targetPage->getCapacity()){					//if whole data fits in page 
 		bytesWritten = targetPage->write(data, sizeOfdata);						//write data in current page
+		if (bytesWritten == -1)
+			return -1;
 	}
 	else{																		//else a split is needed 
 		int bytesWrittenInThisPage = 0, restOfBytes = 0;
@@ -47,6 +47,8 @@ int memPool_t::write(void* const data, const int& sizeOfdata, const int& toPos){
 
 		targetPage->setPos(posInPage);
 		bytesWrittenInThisPage = targetPage->write(data, sizeOfFirstChunk);		//fill current page and continue in next pages
+		if (bytesWrittenInThisPage == -1)
+			return -1;
 		restOfBytes = write((char *)data + sizeOfFirstChunk, sizeOfdata - sizeOfFirstChunk, toPos + sizeOfFirstChunk);
 		bytesWritten = bytesWrittenInThisPage + restOfBytes;
 	}
@@ -58,10 +60,13 @@ int memPool_t::write(void* const data, const int& sizeOfdata, const int& toPos){
 }
 
 
-void memPool_t::read(void *buf, const int & sizeOfData, const int & fromPos) const{
+bool memPool_t::read(void *buf, const int & sizeOfData, const int & fromPos) const{
 	int posInPage;															//will hold offset inside page
 	int targetPageNumber = getPage(&posInPage, fromPos);
 	int bytesToRead = min(sizeOfData, actualSize - fromPos);				//dont read beyond actual size 
+
+	if (bytesToRead<0)
+		return false;
 
 	memPage_t * targetPage = pages[targetPageNumber];
 
@@ -78,6 +83,7 @@ void memPool_t::read(void *buf, const int & sizeOfData, const int & fromPos) con
 		read((char *)buf + sizeOfFirstChunk,								//countinue recursively from next pages 
 			bytesToRead - sizeOfFirstChunk, fromPos + sizeOfFirstChunk);
 	}
+	return true;
 }
 
 

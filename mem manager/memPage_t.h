@@ -31,7 +31,7 @@ public:
 	/*
 	* read  data starting from fromPos  , and store in dst
 	*/
-	void read(void *buf, const int & size, const int & fromPos) const;
+	bool read(void *buf, const int & size, const int & fromPos) const;
 
 
 	/*

@@ -16,9 +16,10 @@ public:
 	inline bool isEmpty()        const		{ return getActualSize() == 0; }
 
 
-	virtual void read(void *buf, const int & size, const int & fromPos) const = 0;
-	inline  void read(void *buf, const int & size) const {
+	virtual bool read(void *buf, const int & size, const int & fromPos) const = 0;
+	inline  bool read(void *buf, const int & size) const {
 		read(buf, size, getPos());
+		return true;
 	}
 
 	virtual int write(void* const data, const int& sizeOfdata, const int& toPos) = 0;
