@@ -17,10 +17,7 @@ public:
 
 
 	virtual bool read(void *buf, const int & size, const int & fromPos) const = 0;
-	inline  bool read(void *buf, const int & size) const {
-		read(buf, size, getPos());
-		return true;
-	}
+	inline  bool read(void *buf, const int & size) const { return read(buf, size, getPos()); }
 
 	virtual int write(void* const data, const int& sizeOfdata, const int& toPos) = 0;
 	inline  int write(void* const data, const int& sizeOfdata){

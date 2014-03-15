@@ -19,7 +19,7 @@ private:
 	void operator=(const memPage_t& rhs){}
 
 public:
-	memPage_t(const int & pageSize = 8);
+	memPage_t(const int & pageSize = 5);
 	virtual ~memPage_t();
 
 	using memManager_t::write;
@@ -29,7 +29,7 @@ public:
 	inline int leftSpace()       const		{ return capacity - actualSize; }
 
 	/*
-	* read  data starting from fromPos  , and store in dst
+	* read  data starting from fromPos  , and store in buf 
 	*/
 	bool read(void *buf, const int & size, const int & fromPos) const;
 

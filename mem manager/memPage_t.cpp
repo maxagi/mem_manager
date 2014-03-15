@@ -20,10 +20,7 @@ bool memPage_t::read(void *dst, const int & size, const int & fromPos) const{
 
 int  memPage_t::write(void* const newData, const int& sizeOfdata, const int& toPos){
 
-	if (toPos < 0){
-		return -1;
-	}
-	assert(toPos + sizeOfdata <= capacity);
+	if (toPos < 0 || toPos+sizeOfdata > capacity) return -1;
 	memcpy(data + toPos, newData, sizeOfdata);
 	currentPos = currentPos + sizeOfdata;
 	actualSize = max(actualSize, toPos + sizeOfdata);
