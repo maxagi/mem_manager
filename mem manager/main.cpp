@@ -58,17 +58,20 @@ int main() {
 			cout << "written " << result << " bytes from position " << position << endl;
 			break;
 		case 3:
-			pool.read(&rx, sizeof(int));
-			printf("read from current position : %d\n", rx);
+			result = pool.read(&rx, sizeof(int));
+			if (result > 0) 
+				printf("read %d bytes from current position, value read =  : %d\n", result, rx);
+			else
+				printf("error reading from current position\n");
 			break;
 		case 4:
 			cout << "enter position" << endl;
 			cin >> position;
-			flag = pool.read(&rx, sizeof(int), position);
-			if (flag)
-				printf("read from position %d : %d\n", position, rx);
+			result = pool.read(&rx, sizeof(int), position);
+			if (result >0)
+				printf("read %d bytes from position %d , value read =  %d\n",result, position, rx);
 			else
-				printf("position Does not exist\n");
+				printf("error reading from position %d\n" ,position);
 			break;
 		case 5:
 			cout << "current position = " << pool.getPos() << endl;

@@ -41,47 +41,56 @@ int memPool_t::write(void* const data, const int& sizeOfdata, const int& toPos){
 		else
 			nextPage = pages[targetPageNumber + 1];
 
-		int sizeOfFirstChunk = targetPage->leftSpace();
-
+		int sizeOfFirstChunk = targetPage->bytesToEnd();
 		targetPage->setPos(posInPage);
 		bytesWrittenInThisPage = targetPage->write(data, sizeOfFirstChunk);		//fill current page and continue in next pages
 		if (bytesWrittenInThisPage == -1) return -1;
+		actualSize = max(actualSize, toPos + bytesWrittenInThisPage);
 
 		restOfBytes = write((char *)data + sizeOfFirstChunk, sizeOfdata - sizeOfFirstChunk, toPos + sizeOfFirstChunk);
+		if (bytesWritten == -1) return -1;
 		bytesWritten = bytesWrittenInThisPage + restOfBytes;
 	}
 
-	currentPos = toPos + sizeOfdata;
+	currentPos = toPos + bytesWritten;
 	currentPage = targetPage;
 	actualSize = max(toPos + sizeOfdata, actualSize);
 	return bytesWritten;
 }
 
 
-bool memPool_t::read(void *buf, const int & sizeOfData, const int & fromPos) const{
+int memPool_t::read(void *buf, const int & sizeOfData, const int & fromPos) {
 	if (fromPos < 0) return false;
-	int posInPage;															//will hold offset inside page
+	int posInPage,bytesRead=0;												//posInPage holds offset inside page
 	int targetPageNumber = getPage(&posInPage, fromPos);
 	int bytesToRead = min(sizeOfData, actualSize - fromPos);				//dont read beyond actual size 
 
-	if (bytesToRead < 0) return false;
+	if (bytesToRead < 0) return -1;
 
 	memPage_t * targetPage = pages[targetPageNumber];
 
 	if (posInPage + bytesToRead <= targetPage->getCapacity()){				//the whole data is in tagetPage
 		targetPage->setPos(posInPage);
-		targetPage->read(buf, bytesToRead);
+		bytesRead= targetPage->read(buf, bytesToRead);
 	}
 	else {																	//need to read from multiple pages
 		int pageCapacity = targetPage->getCapacity();
 		int sizeOfFirstChunk = bytesToRead + posInPage > pageCapacity ?		//is data to read bigger then page capacity ?
 			pageCapacity - posInPage : pageCapacity - bytesToRead;
+		int readFromCurPg = 0, rest = 0;
 
-		targetPage->read(buf, sizeOfFirstChunk, posInPage);					//first read until end of current page
-		read((char *)buf + sizeOfFirstChunk,								//countinue recursively from next pages 
+		readFromCurPg= targetPage->read(buf, sizeOfFirstChunk, posInPage);  //first read until end of current page
+		if (readFromCurPg == -1) return -1;
+		rest = read((char *)buf + sizeOfFirstChunk,							//countinue recursively from next pages 
 			bytesToRead - sizeOfFirstChunk, fromPos + sizeOfFirstChunk);
+		
+		if (rest == -1) return -1;
+		bytesRead= readFromCurPg + rest;
 	}
-	return true;
+
+	currentPos = fromPos + bytesRead;
+	currentPage = targetPage;
+	return bytesRead;
 }
 
 

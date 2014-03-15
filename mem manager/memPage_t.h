@@ -26,12 +26,12 @@ public:
 	using memManager_t::read;
 	inline bool isFull()		 const		{ return getActualSize() == getCapacity(); }
 	inline int getCapacity()	 const		{ return capacity; }
-	inline int leftSpace()       const		{ return capacity - actualSize; }
+	inline int bytesToEnd()      const		{ return capacity - currentPos; }
 
 	/*
 	* read  data starting from fromPos  , and store in buf 
 	*/
-	bool read(void *buf, const int & size, const int & fromPos) const;
+	int read(void *buf, const int & size, const int & fromPos);
 
 
 	/*
